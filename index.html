@@ -77,7 +77,7 @@
         #scroll-down {
             position: absolute;
             bottom: 20px;
-            left: 44%;
+            left: 50%;
             transform: translateX(-50%);
             color: #eee;
             font-size: 1rem;
@@ -128,107 +128,118 @@
         </div>
         <div class="content">
             <section class="section">
-                <h2>Welcome to the Universe of Scrolling Cubes</h2>
-                <p>
+                <h2 id="title1">Welcome to the Universe of Scrolling Cubes</h2>
+                <p id="text1">
                     Embark on a journey through the cosmos of interactive design.  As you scroll,
                     a vibrant cube will rotate, dance, and transform, reacting to your every movement.
                     This is more than just a demonstration; it's an experience.
                 </p>
             </section>
             <section class="section">
-                <h2>The Art of Interactive Design</h2>
-                <p>
+                <h2 id="title2">The Art of Interactive Design</h2>
+                <p id="text2">
                    Feel the power of <span class="highlight">Three.js</span>, a versatile JavaScript library,
                     bringing 3D graphics to life in your browser.  Scroll down to witness the magic.
                 </p>
             </section>
             <section class="section">
-                <h2>Unveiling the Cube</h2>
-                <p>
+                <h2 id="title3">Unveiling the Cube</h2>
+                <p id="text3">
                     Behold the rotating cube, a testament to the beauty of mathematics and code.  As you continue
                     to explore, the cube will reveal its secrets, its colors shifting and changing.
                 </p>
             </section>
              <section class="section">
-                <h2>Beyond the Cube</h2>
-                <p>
+                <h2 id="title4">Beyond the Cube</h2>
+                <p id="text4">
                     This is just the beginning.  Imagine the possibilities: interactive data visualizations,
                     immersive gaming experiences, and breathtaking digital art.  The only limit is your imagination.
                 </p>
             </section>
             <section class="section">
-                <h2>Thank you</h2>
-                <p>
+                <h2 id="title5">Thank you</h2>
+                <p id="text5">
                     Thank you for experiencing this interactive journey.
+                    Programming - Kalyan Mondal
+                    Text/Content - ChatGPT
                 </p>
             </section>
         </div>
         <div id="scroll-down">Scroll Down</div>
     </div>
-
     <script>
-       const scene = new THREE.Scene();
+        const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setClearColor(0x111111); // Match body background
-
-        // Cube geometry and material
+        renderer.setClearColor(0x111111);
+    
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const materials = [
-            new THREE.MeshBasicMaterial({ color: 0xff0000 }), // Red
-            new THREE.MeshBasicMaterial({ color: 0x00ff00 }), // Green
-            new THREE.MeshBasicMaterial({ color: 0x0000ff }), // Blue
-            new THREE.MeshBasicMaterial({ color: 0xffff00 }), // Yellow
-            new THREE.MeshBasicMaterial({ color: 0x00ffff }), // Cyan
-            new THREE.MeshBasicMaterial({ color: 0xff00ff })  // Magenta
+            new THREE.MeshBasicMaterial({ color: 0xff0000 }),
+            new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
+            new THREE.MeshBasicMaterial({ color: 0x0000ff }),
+            new THREE.MeshBasicMaterial({ color: 0xffff00 }),
+            new THREE.MeshBasicMaterial({ color: 0x00ffff }),
+            new THREE.MeshBasicMaterial({ color: 0xff00ff })
         ];
         const cube = new THREE.Mesh(geometry, materials);
         scene.add(cube);
-
         camera.position.z = 3;
-
-        let scrollY = 0;
-        let targetRotationX = 0;
-        let targetRotationY = 0;
-        let currentRotationX = 0;
-        let currentRotationY = 0;
-        const rotationSpeed = 0.1; // Reduced for smoother effect
-        let animationFrameId;
-
+    
+        const sections = document.querySelectorAll('.section');
+        const scrollOffset = window.innerHeight;
+    
+        const sectionData = Array.from(sections).map(section => {
+            const h2 = section.querySelector('h2');
+            const p = section.querySelector('p');
+            const title = h2.textContent.trim();
+            const text = p.textContent.trim();
+            h2.textContent = '';
+            p.textContent = '';
+            return { section, h2, p, title, text };
+        });
+    
         function animate() {
-            animationFrameId = requestAnimationFrame(animate);
-
-            // Damping
-            currentRotationX += (targetRotationX - currentRotationX) * rotationSpeed;
-            currentRotationY += (targetRotationY - currentRotationY) * rotationSpeed;
-
-            cube.rotation.x = currentRotationX;
-            cube.rotation.y = currentRotationY;
-
+            requestAnimationFrame(animate);
             renderer.render(scene, camera);
         }
-
+    
         function handleScroll() {
-            scrollY = window.scrollY;
-            // Map scroll position to target rotation (adjust multiplier for desired speed)
-            targetRotationX = scrollY * 0.005; // Rotate around X axis
-            targetRotationY = scrollY * 0.005; // Rotate around Y axis
+            const scrollY = window.scrollY;
+            const windowHeight = window.innerHeight;
+    
+            // Cube rotation
+            const targetRotation = scrollY * 0.005;
+            cube.rotation.x = targetRotation;
+            cube.rotation.y = targetRotation;
+    
+            // Animate text by scroll
+            sectionData.forEach(({ section, h2, p, title, text }) => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.offsetHeight;
+                const distanceFromTop = scrollY + windowHeight - sectionTop;
+                const scrollRatio = Math.min(Math.max(distanceFromTop / sectionHeight, 0), 1);
+    
+                const titleLength = Math.floor(scrollRatio * title.length);
+                const textLength = Math.floor(scrollRatio * text.length);
+    
+                h2.textContent = title.substring(0, titleLength);
+                p.textContent = text.substring(0, textLength);
+            });
         }
-
+    
         window.addEventListener('scroll', handleScroll);
-
-        // Start the animation loop.
-        animate();
-
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
-        // Make sure to call handleScroll once on load to set the initial rotation.
-        handleScroll();
+    
+        animate();
+        handleScroll(); // Initial trigger
     </script>
+    
+     
 </body>
 </html>
