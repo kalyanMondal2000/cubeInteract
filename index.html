@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrolling Cube</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            font-family: 'Press Start 2P', cursive;
+            overflow-x: hidden; /* Prevent horizontal scrollbar */
+            background-color: #111;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30"><circle cx="15" cy="15" r="10" fill="#ff6700" /></svg>') 15 15, auto;
+        }
+
+        .container {
+            position: relative; /* Allows for absolutely positioned elements within */
+            width: 100%;
+            height: 300vh; /* Make the container taller than the viewport */
+        }
+
+        #webgl-container {
+            position: fixed; /* Fix the canvas to the viewport */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            pointer-events: none; /* Allows clicks to go through the canvas */
+            z-index: 0;
+        }
+
+        .content {
+            /* Make sure content is above the canvas */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1;
+            padding-top: 100vh; /* Start content after the initial canvas height */
+            padding-left: 5%;
+            padding-right: 5%;
+            box-sizing: border-box;
+        }
+
+        .section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            text-align: left;
+            color: #eee;
+            font-size: 1.5rem;
+            line-height: 1.5;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+        .section:last-child{
+           border-bottom: none;
+        }
+
+        .section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ff6700;
+        }
+
+        .highlight {
+            color: #ffdb58;
+        }
+
+        #scroll-down {
+            position: absolute;
+            bottom: 20px;
+            left: 44%;
+            transform: translateX(-50%);
+            color: #eee;
+            font-size: 1rem;
+            z-index: 1;
+            cursor: pointer;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .section {
+                font-size: 1.2rem;
+                line-height: 1.7;
+            }
+            .section h2 {
+                font-size: 2rem;
+            }
+            .content {
+                padding-left: 10%;
+                padding-right: 10%;
+            }
+        }
+        @media screen and (max-width: 600px){
+            .section{
+               font-size: 1rem;
+            }
+            .section h2{
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="webgl-container">
+            <canvas id="three-canvas"></canvas>
+        </div>
+        <div class="content">
+            <section class="section">
+                <h2>Welcome to the Universe of Scrolling Cubes</h2>
+                <p>
+                    Embark on a journey through the cosmos of interactive design.  As you scroll,
+                    a vibrant cube will rotate, dance, and transform, reacting to your every movement.
+                    This is more than just a demonstration; it's an experience.
+                </p>
+            </section>
+            <section class="section">
+                <h2>The Art of Interactive Design</h2>
+                <p>
+                   Feel the power of <span class="highlight">Three.js</span>, a versatile JavaScript library,
+                    bringing 3D graphics to life in your browser.  Scroll down to witness the magic.
+                </p>
+            </section>
+            <section class="section">
+                <h2>Unveiling the Cube</h2>
+                <p>
+                    Behold the rotating cube, a testament to the beauty of mathematics and code.  As you continue
+                    to explore, the cube will reveal its secrets, its colors shifting and changing.
+                </p>
+            </section>
+             <section class="section">
+                <h2>Beyond the Cube</h2>
+                <p>
+                    This is just the beginning.  Imagine the possibilities: interactive data visualizations,
+                    immersive gaming experiences, and breathtaking digital art.  The only limit is your imagination.
+                </p>
+            </section>
+            <section class="section">
+                <h2>Thank you</h2>
+                <p>
+                    Thank you for experiencing this interactive journey.
+                </p>
+            </section>
+        </div>
+        <div id="scroll-down">Scroll Down</div>
+    </div>
+
+    <script>
+       const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x111111); // Match body background
+
+        // Cube geometry and material
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const materials = [
+            new THREE.MeshBasicMaterial({ color: 0xff0000 }), // Red
+            new THREE.MeshBasicMaterial({ color: 0x00ff00 }), // Green
+            new THREE.MeshBasicMaterial({ color: 0x0000ff }), // Blue
+            new THREE.MeshBasicMaterial({ color: 0xffff00 }), // Yellow
+            new THREE.MeshBasicMaterial({ color: 0x00ffff }), // Cyan
+            new THREE.MeshBasicMaterial({ color: 0xff00ff })  // Magenta
+        ];
+        const cube = new THREE.Mesh(geometry, materials);
+        scene.add(cube);
+
+        camera.position.z = 3;
+
+        let scrollY = 0;
+        let targetRotationX = 0;
+        let targetRotationY = 0;
+        let currentRotationX = 0;
+        let currentRotationY = 0;
+        const rotationSpeed = 0.1; // Reduced for smoother effect
+        let animationFrameId;
+
+        function animate() {
+            animationFrameId = requestAnimationFrame(animate);
+
+            // Damping
+            currentRotationX += (targetRotationX - currentRotationX) * rotationSpeed;
+            currentRotationY += (targetRotationY - currentRotationY) * rotationSpeed;
+
+            cube.rotation.x = currentRotationX;
+            cube.rotation.y = currentRotationY;
+
+            renderer.render(scene, camera);
+        }
+
+        function handleScroll() {
+            scrollY = window.scrollY;
+            // Map scroll position to target rotation (adjust multiplier for desired speed)
+            targetRotationX = scrollY * 0.005; // Rotate around X axis
+            targetRotationY = scrollY * 0.005; // Rotate around Y axis
+        }
+
+        window.addEventListener('scroll', handleScroll);
+
+        // Start the animation loop.
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Make sure to call handleScroll once on load to set the initial rotation.
+        handleScroll();
+    </script>
+</body>
+</html>
